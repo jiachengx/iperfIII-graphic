@@ -580,7 +580,10 @@ class mainlevel:
         if mode == 'Server':
             dict_config['mode'] = mode
             if gp3_support.che59.get() == 1:
-                if not self.isNum(self.entry_srvInterval.get()):
+                if self.entry_srvInterval.get() is None:
+                    messagebox.showerror("Server Interval", "Please fill in the required interval time")
+                    return
+                elif not self.isNum(self.entry_srvInterval.get()):
                     messagebox.showerror("Server Interval", "A non-numeric value encountered")
                     return
                 else:
@@ -589,7 +592,10 @@ class mainlevel:
             if gp3_support.che50.get() == 0:
                 dict_config['srvPort'] = '5201'
             elif gp3_support.che50.get() == 1:
-                if self.isNum(self.entry_srvPort.get()):
+                if self.entry_srvPort.get() is None:
+                    messagebox.showerror("Server Port","Please fill in the Server Listened port number")
+                    return
+                elif self.isNum(self.entry_srvPort.get()):
                     dict_config['srvPort'] = self.entry_srvPort.get()
                 elif not self.isNum(self.entry_srvPort.get()):
                     messagebox.showerror("Server Listened Port", "A non-numeric value encountered")
@@ -597,8 +603,11 @@ class mainlevel:
 
         elif mode == 'Client':
             dict_config['mode'] = mode
-            if not self.isValidiP(self.entry_ipaddr.get()):
-                messagebox.showerror("ERROR", "ip address is invalid")
+            if self.entry_ipaddr.get() is None:
+                messagebox.showerror("IP Address", "Please fill in the Server IP address")
+                return
+            elif not self.isValidiP(self.entry_ipaddr.get()):
+                messagebox.showerror("ERROR", "IP address is invalid")
                 return
             else:
                 dict_config['ipaddr'] = self.entry_ipaddr.get()
@@ -607,26 +616,36 @@ class mainlevel:
             if gp3_support.che49.get() == 0:
                 dict_config['cPort'] = '5201'  # default port: 5201
             elif gp3_support.che49.get() == 1:
-                if not self.isNum(self.entry_cListenedPort.get()):
+                if self.entry_cListenedPort.get() is None:
+                    messagebox.showerror("Client Listened Port", "Please fill in the Client Listened port number")
+                elif not self.isNum(self.entry_cListenedPort.get()):
                     messagebox.showerror("Client Listened Port", "A non-numeric value encountered")
                     return
                 else:
                     dict_config['cPort'] = self.entry_cListenedPort.get()
             if gp3_support.che47.get() == 1:
-                if not self.isNum(self.entry_cInterval.get()):
+                if self.entry_cInterval.get() is None:
+                    messagebox.showerror("Client Interval","Please fill in the required interval time")
+                elif not self.isNum(self.entry_cInterval.get()):
                     messagebox.showerror("Client Interval", "A non-numeric value encountered")
                     return
                 else:
                     dict_config['cInterval'] = self.entry_cInterval.get()
             if gp3_support.che51.get() == 1:
-                if not self.isNum(self.entry_testTime.get()):
+                if self.entry_testTime.get() is None:
+                    messagebox.showerror("Test Time","Please fill in the required Test time")
+                    return
+                elif not self.isNum(self.entry_testTime.get()):
                     messagebox.showerror("Test Time", "A non-numeric value encountered")
                     return
                 else:
                     dict_config['cTestTime'] = self.entry_testTime.get()
 
             if gp3_support.che53.get() == 1:
-                if not self.isNum(self.entry_numOfParallelClient.get()):
+                if self.entry_numOfParallelClient.get() is None:
+                    messagebox.showerror("Number Of Parallel Client","Please fill in the Number Of Parallel Client")
+                    return
+                elif not self.isNum(self.entry_numOfParallelClient.get()):
                     messagebox.showerror("Number Of Parallel Client", "A non-numeric value encountered")
                     return
                 else:
@@ -635,14 +654,20 @@ class mainlevel:
                 dict_config['udp'] = 'True'
 
             if gp3_support.che63.get() == 1:
-                if not self.isNum(self.entry_bw.get()):
+                if self.entry_bw.get() is None:
+                    messagebox.showerror("Bandwidth","Please fill in the bandwdith vaule")
+                    return
+                elif not self.isNum(self.entry_bw.get()):
                     messagebox.showerror("Bandwidth", "A non-numeric value encountered")
                     return
                 else:
                     dict_config['cBW'] = self.entry_bw.get() + self.cmb_BWrate.get()[0]
 
             if gp3_support.che68.get() == 1:
-                if not self.isNum(self.entry_windowSize.get()):
+                if self.entry_windowSize.get() == None:
+                    messagebox.showerror("WindowSize","Please fill in the Window Size value")
+                    return
+                elif not self.isNum(self.entry_windowSize.get()):
                     messagebox.showerror("WindowSize", "A non-numeric value encountered")
                     return
                 else:
@@ -681,7 +706,7 @@ class mainlevel:
 
     def runPerf(self):
         self.clock.start()
-        self.fillInPerfcmd("teskt")
+        self.fillInPerfcmd("iperf3 {0}".format(self.genPerfOpt()))
 
     def display(self, record):
         msg = self.queue_handler.format(record)
