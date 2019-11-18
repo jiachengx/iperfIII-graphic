@@ -17,6 +17,7 @@ from time import sleep
 logger = logging.getLogger('')
 perfCMD = ""
 dict_config = {}
+list_perfCMD = []
 
 try:
     import Tkinter as tk
@@ -139,7 +140,7 @@ class mainlevel:
         self.entry_srvInterval.configure(selectbackground="#c4c4c4")
         self.entry_srvInterval.configure(selectforeground="black")
 
-        self.chk_srvinterval = tk.Checkbutton(self.lframe_Server, command=self.enableEntry)
+        self.chk_srvinterval = tk.Checkbutton(self.lframe_Server, command=self.function_UISwitch)
         self.chk_srvinterval.place(relx=0.067, rely=0.267, relheight=0.347
                                    , relwidth=0.567, bordermode='ignore')
         self.chk_srvinterval.configure(activebackground="#ececec")
@@ -153,7 +154,7 @@ class mainlevel:
         self.chk_srvinterval.configure(text='''Interval (s)''')
         self.chk_srvinterval.configure(variable=gp3_support.che59)
 
-        self.chk_srvPort = tk.Checkbutton(self.lframe_Server, command=self.enableEntry)
+        self.chk_srvPort = tk.Checkbutton(self.lframe_Server, command=self.function_UISwitch)
         self.chk_srvPort.place(relx=0.04, rely=0.573, relheight=0.347
                                , relwidth=0.413, bordermode='ignore')
         self.chk_srvPort.configure(activebackground="#ececec")
@@ -202,7 +203,7 @@ class mainlevel:
         self.entry_ipaddr.configure(selectbackground="#c4c4c4")
         self.entry_ipaddr.configure(selectforeground="black")
 
-        self.chk_clientInterval = tk.Checkbutton(self.lframe_ClientMode, command=self.enableEntry)
+        self.chk_clientInterval = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
         self.chk_clientInterval.place(relx=0.017, rely=0.161, relheight=0.102
                                       , relwidth=0.511, bordermode='ignore')
         self.chk_clientInterval.configure(activebackground="#ececec")
@@ -229,7 +230,7 @@ class mainlevel:
         self.entry_cInterval.configure(selectbackground="#c4c4c4")
         self.entry_cInterval.configure(selectforeground="black")
 
-        self.chk_cListenedPort = tk.Checkbutton(self.lframe_ClientMode, command=self.enableEntry)
+        self.chk_cListenedPort = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
         self.chk_cListenedPort.place(relx=0.028, rely=0.235, relheight=0.102
                                      , relwidth=0.283, bordermode='ignore')
         self.chk_cListenedPort.configure(activebackground="#ececec")
@@ -259,7 +260,7 @@ class mainlevel:
         ToolTip(self.entry_cListenedPort, tooltip_font, '''"Client port number must match with server port"''',
                 delay=0.5)
 
-        self.chk_testDuration = tk.Checkbutton(self.lframe_ClientMode, command=self.enableEntry)
+        self.chk_testDuration = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
         self.chk_testDuration.place(relx=0.017, rely=0.318, relheight=0.102
                                     , relwidth=0.55, bordermode='ignore')
         self.chk_testDuration.configure(activebackground="#ececec")
@@ -286,7 +287,7 @@ class mainlevel:
         self.entry_testTime.configure(selectbackground="#c4c4c4")
         self.entry_testTime.configure(selectforeground="black")
 
-        self.chk_numOfParallelClient = tk.Checkbutton(self.lframe_ClientMode, command=self.enableEntry)
+        self.chk_numOfParallelClient = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
         self.chk_numOfParallelClient.place(relx=0.044, rely=0.416
                                            , relheight=0.102, relwidth=0.9, bordermode='ignore')
         self.chk_numOfParallelClient.configure(activebackground="#ececec")
@@ -327,7 +328,7 @@ class mainlevel:
         self.chk_enableUDP.configure(text='''Enable UDP''')
         self.chk_enableUDP.configure(variable=gp3_support.che56)
 
-        self.chk_bandwidth = tk.Checkbutton(self.lframe_ClientMode, command=self.enableEntry)
+        self.chk_bandwidth = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
         self.chk_bandwidth.place(relx=0.028, rely=0.651, relheight=0.102
                                  , relwidth=0.511, bordermode='ignore')
         self.chk_bandwidth.configure(activebackground="#ececec")
@@ -362,7 +363,7 @@ class mainlevel:
         self.cmb_BWrate.configure(takefocus="")
         self.cmb_BWrate.set('KB')
 
-        self.chk_windowSize = tk.Checkbutton(self.lframe_ClientMode, command=self.enableEntry)
+        self.chk_windowSize = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
         self.chk_windowSize.place(relx=0.028, rely=0.804, relheight=0.102
                                   , relwidth=0.567, bordermode='ignore')
         self.chk_windowSize.configure(activebackground="#ececec")
@@ -398,7 +399,7 @@ class mainlevel:
         self.cmb_WindowSize.set('KB')
 
         # self.btn_Start = tk.Button(top,command=self.runPerf)
-        self.btn_Start = tk.Button(top, command=self.runall)
+        self.btn_Start = tk.Button(top, command=self.go)
         self.btn_Start.place(relx=0.784, rely=0.026, height=66, width=78)
         self.btn_Start.configure(activebackground="#ececec")
         self.btn_Start.configure(activeforeground="#000000")
@@ -518,54 +519,64 @@ class mainlevel:
     # Customized function
     # ======================================================
 
-    def enableEntry(self):
+    def function_UISwitch(self):
         if gp3_support.che59.get() == 1:
             self.entry_srvInterval.configure(state='normal')
         elif gp3_support.che59.get() == 0:
+            self.entry_srvInterval.delete(0, 'end')
             self.entry_srvInterval.configure(state='disabled')
         if gp3_support.che50.get() == 1:
             self.entry_srvPort.configure(state='normal')
         elif gp3_support.che50.get() == 0:
+            self.entry_srvPort.delete(0,'end')
             self.entry_srvPort.configure(state='disabled')
 
         if gp3_support.che47.get() == 1:
             self.entry_cInterval.configure(state='normal')
         elif gp3_support.che47.get() == 0:
+            self.entry_cInterval.delete(0,'end')
             self.entry_cInterval.configure(state='disabled')
         if gp3_support.che49.get() == 1:
             self.entry_cListenedPort.configure(state='normal')
         elif gp3_support.che49.get() == 0:
+            self.entry_cListenedPort.delete(0,'end')
             self.entry_cListenedPort.configure(state='disabled')
         if gp3_support.che51.get() == 1:
             self.entry_testTime.configure(state='normal')
         elif gp3_support.che51.get() == 0:
+            self.entry_testTime.delete(0,'end')
             self.entry_testTime.configure(state='disabled')
         if gp3_support.che53.get() == 1:
             self.entry_numOfParallelClient.configure(state='normal')
         elif gp3_support.che53.get() == 0:
+            self.entry_numOfParallelClient.delete(0,'end')
             self.entry_numOfParallelClient.configure(state='disabled')
         if gp3_support.che63.get() == 1:
             self.entry_bw.configure(state='normal')
             self.cmb_BWrate.configure(state='normal')
         elif gp3_support.che63.get() == 0:
+            self.entry_bw.delete(0,'end')
             self.entry_bw.configure(state='disabled')
             self.cmb_BWrate.configure(state='disabled')
         if gp3_support.che68.get() == 1:
             self.entry_windowSize.configure(state='normal')
             self.cmb_WindowSize.configure(state='normal')
         elif gp3_support.che68.get() == 0:
+            self.entry_windowSize.delete(0,'end')
             self.entry_windowSize.configure(state='disabled')
             self.cmb_WindowSize.configure(state='disabled')
 
-    def runall(self):
-
-        # collect all of configureation
+    def go(self):
+        dict_config.clear()
+        self.entry_runCMD.configure(state='normal')
+        self.entry_runCMD.delete(0, 'end')
+        self.entry_runCMD.configure(state='readonly')
         self.collectAllofConfig()
-        print(self.combox_modeSwitch.get())
-        return
-        # disable ui
-        #
-        # sys.exit(0)
+        perfOpt = self.genPerfOpt()
+        self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
+        #self.clock.start()
+
+
 
     def isValidiP(self, ip):
         m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
@@ -593,7 +604,7 @@ class mainlevel:
                 dict_config['srvPort'] = '5201'
             elif gp3_support.che50.get() == 1:
                 if self.entry_srvPort.get() is None:
-                    messagebox.showerror("Server Port","Please fill in the Server Listened port number")
+                    messagebox.showerror("Server Port", "Please fill in the Server Listened port number")
                     return
                 elif self.isNum(self.entry_srvPort.get()):
                     dict_config['srvPort'] = self.entry_srvPort.get()
@@ -625,7 +636,7 @@ class mainlevel:
                     dict_config['cPort'] = self.entry_cListenedPort.get()
             if gp3_support.che47.get() == 1:
                 if self.entry_cInterval.get() is None:
-                    messagebox.showerror("Client Interval","Please fill in the required interval time")
+                    messagebox.showerror("Client Interval", "Please fill in the required interval time")
                 elif not self.isNum(self.entry_cInterval.get()):
                     messagebox.showerror("Client Interval", "A non-numeric value encountered")
                     return
@@ -633,7 +644,7 @@ class mainlevel:
                     dict_config['cInterval'] = self.entry_cInterval.get()
             if gp3_support.che51.get() == 1:
                 if self.entry_testTime.get() is None:
-                    messagebox.showerror("Test Time","Please fill in the required Test time")
+                    messagebox.showerror("Test Time", "Please fill in the required Test time")
                     return
                 elif not self.isNum(self.entry_testTime.get()):
                     messagebox.showerror("Test Time", "A non-numeric value encountered")
@@ -643,7 +654,7 @@ class mainlevel:
 
             if gp3_support.che53.get() == 1:
                 if self.entry_numOfParallelClient.get() is None:
-                    messagebox.showerror("Number Of Parallel Client","Please fill in the Number Of Parallel Client")
+                    messagebox.showerror("Number Of Parallel Client", "Please fill in the Number Of Parallel Client")
                     return
                 elif not self.isNum(self.entry_numOfParallelClient.get()):
                     messagebox.showerror("Number Of Parallel Client", "A non-numeric value encountered")
@@ -655,7 +666,7 @@ class mainlevel:
 
             if gp3_support.che63.get() == 1:
                 if self.entry_bw.get() is None:
-                    messagebox.showerror("Bandwidth","Please fill in the bandwdith vaule")
+                    messagebox.showerror("Bandwidth", "Please fill in the bandwdith vaule")
                     return
                 elif not self.isNum(self.entry_bw.get()):
                     messagebox.showerror("Bandwidth", "A non-numeric value encountered")
@@ -664,8 +675,8 @@ class mainlevel:
                     dict_config['cBW'] = self.entry_bw.get() + self.cmb_BWrate.get()[0]
 
             if gp3_support.che68.get() == 1:
-                if self.entry_windowSize.get() == None:
-                    messagebox.showerror("WindowSize","Please fill in the Window Size value")
+                if self.entry_windowSize.get() is None:
+                    messagebox.showerror("WindowSize", "Please fill in the Window Size value")
                     return
                 elif not self.isNum(self.entry_windowSize.get()):
                     messagebox.showerror("WindowSize", "A non-numeric value encountered")
@@ -677,36 +688,32 @@ class mainlevel:
             return
 
     def genPerfOpt(self):
-        list_perfCMD = []
-
+        if len(list_perfCMD)>0:
+            list_perfCMD.clear()
         if dict_config.get('mode') == "Server":
             list_perfCMD.append("-s")
-            if not dict_config.get('srvInterval') is None:
-                list_perfCMD.append(dict_config.get('srvInterval'))
-            elif not dict_config.get('srvPort') is None:
-                list_perfCMD.append(dict_config.get('srvPort'))
-        elif dict_config.get('mode') == 'Client':
-            if not dict_config.get('ipaddr') is None:
+            if 'srvInterval' in dict_config:
+                list_perfCMD.append("-i {0}".format(dict_config.get('srvInterval')))
+            if 'srvPort' in dict_config:
+                list_perfCMD.append("-p {0}".format(dict_config.get('srvPort')))
+        elif dict_config.get('mode') == "Client":
+            if 'ipaddr' in dict_config:
                 list_perfCMD.append("-c {0}".format(dict_config.get('ipaddr')))
-            elif not dict_config.get('udp') is None:
+            if 'udp' in dict_config:
                 list_perfCMD.append("-u")
-            elif not dict_config.get('cBW') is None:
-                list_perfCMD.append("-b {0}".formaT(dict_config.get('cBW')))
-            elif not dict_config.get('numOfParallelClient') is None:
+            if 'cBW' in dict_config:
+                list_perfCMD.append("-b {0}".format(dict_config.get('cBW')))
+            if 'numOfParallelClient' in dict_config:
                 list_perfCMD.append("-P{0}".format(dict_config.get('numOfParallelClient')))
-            elif not dict_config.get('cPort') is None:
+            if 'cPort' in dict_config:
                 list_perfCMD.append("-p {0}".format(dict_config.get('cPort')))
-            elif not dict_config.get('cTestTime') is None:
+            if 'cTestTime' in dict_config:
                 list_perfCMD.append("-t {0}".format(dict_config.get('cTestTime')))
-            elif not dict_config.get('cInterval') is None:
+            if 'cInterval' in dict_config:
                 list_perfCMD.append("-i {0}".format(dict_config.get('cInterval')))
-            elif not dict_config.get('cWindowSize') is None:
+            if 'cWindowSize' in dict_config:
                 list_perfCMD.append("-w {0}".format(dict_config.get('cWindowSize')))
         return " ".join(list_perfCMD)
-
-    def runPerf(self):
-        self.clock.start()
-        self.fillInPerfcmd("iperf3 {0}".format(self.genPerfOpt()))
 
     def display(self, record):
         msg = self.queue_handler.format(record)
@@ -728,11 +735,13 @@ class mainlevel:
             if self.clock.is_alive():
                 self.clock.stop()
         except:
-            pass
+            self.clock.stop()
 
     def clearState(self):  # stephenhsu.20191112_1749
+        global list_perfCMD
         print("Test")
         self.quit()
+        list_perfCMD.clear()
         # disable all of checked box
         gp3_support.che47.set(0)
         gp3_support.che49.set(0)
@@ -795,7 +804,6 @@ class Clock(threading.Thread):
 
     def run(self):
         logger.debug('[Debug] Thread perf started.')
-        tcmd = "dir /b"
 
         previous = -1
         # send any command and then get stdout (PIPE + error) from console
