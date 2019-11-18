@@ -12,10 +12,13 @@ except ImportError:
 
 try:
     import ttk
+
     py3 = False
 except ImportError:
     import tkinter.ttk as ttk
+
     py3 = True
+
 
 def set_Tk_var():
     global che59
@@ -37,11 +40,13 @@ def set_Tk_var():
     global che68
     che68 = tk.IntVar()
 
+
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
     w = gui
     top_level = top
     root = top
+
 
 def destroy_window():
     # Function which closes the window.
@@ -49,10 +54,8 @@ def destroy_window():
     top_level.destroy()
     top_level = None
 
+
 if __name__ == '__main__':
     import gp3
+
     gp3.vp_start_gui()
-
-
-
-
