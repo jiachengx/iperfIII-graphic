@@ -575,7 +575,6 @@ class mainlevel:
         return str(content).isdigit()
 
     def collectAllofConfig(self):
-        global srvport
         mode = self.combox_modeSwitch.get()  # mode
 
         if mode == 'Server':
@@ -640,19 +639,45 @@ class mainlevel:
                     messagebox.showerror("Bandwidth", "A non-numeric value encountered")
                     return
                 else:
-                    dict['cBW'] = self.entry_bw.get() + self.cmb_BWrate.get()[0]
+                    dict_config['cBW'] = self.entry_bw.get() + self.cmb_BWrate.get()[0]
 
             if gp3_support.che68.get() == 1:
                 if not self.isNum(self.entry_windowSize.get()):
                     messagebox.showerror("WindowSize", "A non-numeric value encountered")
                     return
                 else:
-                    dict['cWindowSize'] = self.entry_windowSize.get() + self.cmb_WindowSize.get()[0]
+                    dict_config['cWindowSize'] = self.entry_windowSize.get() + self.cmb_WindowSize.get()[0]
         else:
             messagebox.showerror("Mode Switch", "Please check your Mode configuration")
             return
 
-        pass
+    def genPerfOpt(self):
+        list_perfCMD = []
+
+        if dict_config.get('mode') == "Server":
+            list_perfCMD.append("-s")
+            if not dict_config.get('srvInterval') is None:
+                list_perfCMD.append(dict_config.get('srvInterval'))
+            elif not dict_config.get('srvPort') is None:
+                list_perfCMD.append(dict_config.get('srvPort'))
+        elif dict_config.get('mode') == 'Client':
+            if not dict_config.get('ipaddr') is None:
+                list_perfCMD.append("-c {0}".format(dict_config.get('ipaddr')))
+            elif not dict_config.get('udp') is None:
+                list_perfCMD.append("-u")
+            elif not dict_config.get('cBW') is None:
+                list_perfCMD.append("-b {0}".formaT(dict_config.get('cBW')))
+            elif not dict_config.get('numOfParallelClient') is None:
+                list_perfCMD.append("-P{0}".format(dict_config.get('numOfParallelClient')))
+            elif not dict_config.get('cPort') is None:
+                list_perfCMD.append("-p {0}".format(dict_config.get('cPort')))
+            elif not dict_config.get('cTestTime') is None:
+                list_perfCMD.append("-t {0}".format(dict_config.get('cTestTime')))
+            elif not dict_config.get('cInterval') is None:
+                list_perfCMD.append("-i {0}".format(dict_config.get('cInterval')))
+            elif not dict_config.get('cWindowSize') is None:
+                list_perfCMD.append("-w {0}".format(dict_config.get('cWindowSize')))
+        return " ".join(list_perfCMD)
 
     def runPerf(self):
         self.clock.start()
