@@ -38,7 +38,7 @@ import gp3_support
 
 
 def vp_start_gui():
-    '''Starting point when module is the main routine.'''
+    """Starting point when module is the main routine."""
     global val, w, root
     root = tk.Tk()
     gp3_support.set_Tk_var()
@@ -53,7 +53,7 @@ w = None
 
 
 def create_mainlevel(root, *args, **kwargs):
-    '''Starting point when module is imported by another program.'''
+    """Starting point when module is imported by another program."""
     global w, w_win, rt
     rt = root
     w = tk.Toplevel(root)
@@ -71,8 +71,8 @@ def destroy_mainlevel():
 
 class mainlevel:
     def __init__(self, top=None):
-        '''This class configures and populates the toplevel window.
-           top is the toplevel containing window.'''
+        """This class configures and populates the toplevel window.
+           top is the toplevel containing window."""
         self.clock = Clock()
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
         _fgcolor = '#000000'  # X11 color: 'black'
@@ -88,7 +88,6 @@ class mainlevel:
         self.style.map('.', background=
         [('selected', _compcolor), ('active', _ana2color)])
 
-        self.srvport = False
         self.root = root
         self.root.bind('Control-q>', self.quit)
         signal.signal(signal.SIGINT, self.quit)
@@ -812,7 +811,7 @@ class ToolTip(tk.Toplevel):
         self.wdgt = wdgt
         # The parent of the ToolTip is the parent of the ToolTips widget
         self.parent = self.wdgt.master
-        # Initalise the Toplevel
+        # Initialise the Toplevel
         tk.Toplevel.__init__(self, self.parent, bg='black', padx=1, pady=1)
         # Hide initially
         self.withdraw()
@@ -903,7 +902,7 @@ class ToolTip(tk.Toplevel):
 
 # The following code is added to facilitate the Scrolled widgets you specified.
 class AutoScroll(object):
-    '''Configure the scrollbars for a widget.'''
+    """Configure the scrollbars for a widget."""
 
     def __init__(self, master):
         #  Rozen. Added the try-except clauses so that this class
@@ -947,7 +946,7 @@ class AutoScroll(object):
 
     @staticmethod
     def _autoscroll(sbar):
-        '''Hide and show scrollbar as needed.'''
+        """Hide and show scrollbar as needed."""
 
         def wrapped(first, last):
             first, last = float(first), float(last)
@@ -964,8 +963,8 @@ class AutoScroll(object):
 
 
 def _create_container(func):
-    '''Creates a ttk Frame with a given master, and use this new frame to
-    place the scrollbars and the widget.'''
+    """Creates a ttk Frame with a given master, and use this new frame to
+    place the scrollbars and the widget."""
 
     def wrapped(cls, master, **kw):
         container = ttk.Frame(master)
@@ -977,8 +976,8 @@ def _create_container(func):
 
 
 class ScrolledText(AutoScroll, tk.Text):
-    '''A standard Tkinter Text widget with scrollbars that will
-    automatically show/hide as needed.'''
+    """A standard Tkinter Text widget with scrollbars that will
+    automatically show/hide as needed."""
 
     @_create_container
     def __init__(self, master, **kw):
