@@ -861,15 +861,32 @@ class Clock(threading.Thread):
                 now = datetime.datetime.now()
                 if previous != now.second:
                     previous = now.second
-                    for resp in p.stdout:
-                        second_resp = resp
-                        if now.second % 1 == 0:
-                            level = logging.ERROR
-                        else:
-                            level = logging.INFO
-                        logger.log(level, resp.decode('utf-8').strip('\r\n'))
-                        self.outToLog(second_resp)
+                    if dict_config['mode'] == "Server":
+                        while True:
+                            outResp = p.stdout.readline()
+                            if bool_btnStart != False:
+                                if now.second % 1 == 0:
+                                    level = logging.ERROR
+                                else:
+                                    level = logging.INFO
+                                if outResp == b"":
+                                    sleep(0.5)
+                                else:
+                                    logger.log(level, outResp.decode('utf-8').strip('\r\n'))
+                            else:
+                                break
+                    else:
+                        for resp in p.stdout:
+                            second_resp = resp
+                            if now.second % 1 == 0:
+                                level = logging.ERROR
+                            else:
+                                level = logging.INFO
+                            logger.log(level, resp.decode('utf-8').strip('\r\n'))
+                            self.outToLog(second_resp)
+                    logger.log(level, "=========================")
                     # mode detect
+                    # if mode = server, keep monitor the port
                     self.pause()
                     self.stop()
                     fn.close()
