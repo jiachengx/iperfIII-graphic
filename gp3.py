@@ -574,7 +574,8 @@ class mainlevel:
         self.collectAllofConfig()
         perfOpt = self.genPerfOpt()
         self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
-        #self.clock.start()
+
+        self.clock.start()
 
 
 
@@ -716,6 +717,7 @@ class mainlevel:
         return " ".join(list_perfCMD)
 
     def display(self, record):
+        print(record)
         msg = self.queue_handler.format(record)
         self.scrolledtxt_output.insert("end", msg + "\n")
 
@@ -802,27 +804,50 @@ class Clock(threading.Thread):
     def getCurrentTime(self):
         return datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S_%f')
 
-    def run(self):
-        logger.debug('[Debug] Thread perf started.')
+    def outToLog(self, content):
+        fn.writelines(content.decode('utf-8').strip('\r\n') + '\n')
+        fn.flush()
 
+    def run(self):
+        global fn
+        fn = open("iperf3_{0}.log".format(self.getCurrentTime()), "a+")
+        logger.debug('[Debug] Thread clock started.')
         previous = -1
-        # send any command and then get stdout (PIPE + error) from console
-        # log out function is ready
-        # stephenhsu.20191114.1600
+        second_resp = b''
+        p = sub.Popen("dir /s", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+        # p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
         while not self._stop_event.is_set():
-            p = sub.Popen(perfCMD, stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-            with open("iperf3_{0}.log".format(self.getCurrentTime()), "a") as fn:
+            now = datetime.datetime.now()
+            if previous != now.second:
+                previous = now.second
                 for resp in p.stdout:
-                    level = logging.INFO
+                    second_resp = resp
+                    if now.second % 2 == 0:
+                        level = logging.ERROR
+                    else:
+                        level = logging.INFO
                     logger.log(level, resp.decode('utf-8').strip('\r\n'))
-                    # logging out to iperf_{datetime}.log file
-                    fn.writelines(resp.decode('utf-8').strip('\r\n') + '\n')
+                    self.outToLog(second_resp)
                 self._stop_event.set()
+                fn.close()
             sleep(0.2)
+
+
+
+            #sleep(0.2)
 
     def stop(self):
         self._stop_event.set()
 
+"""            #p = sub.Popen("dir /s", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+            #p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+            #with open("iperf3_{0}.log".format(self.getCurrentTime()), "a") as fn:
+            #    for resp in p.stdout:
+            #        level = logging.INFO
+            #        logger.log(level, resp.decode('utf-8').strip('\r\n'))
+            #        # logging out to iperf_{datetime}.log file
+            #        fn.writelines(resp.decode('utf-8').strip('\r\n') + '\n')
+            #    self._stop_event.set()"""
 
 class QueueHandler(logging.Handler):
     """Class to send logging records to a queue
