@@ -48,7 +48,8 @@ def vp_start_gui():
     top = mainlevel(root)
     gp3_support.init(root, top)
     # Add logging to scrolled text function and detect break stephenhsu.20191114_1136
-    logging.basicConfig(level=logging.DEBUG)
+    #logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     root.mainloop()
 
 
@@ -581,17 +582,21 @@ class mainlevel:
             bool_btnStart = True
         else:
             bool_btnStart = True
+            self.delRunCmd()
             if self.clock.is_alive():
                 self.clock.resume()
             else:
                 self.clock.start()
-            self.btn_Start.configure(text='''Start ...''')
+            self.btn_Start.configure(text='''Start''')
             bool_btnStart = False
-        self.entry_runCMD.delete(0, 'end')
-        self.entry_runCMD.configure(state='readonly')
+        self.delRunCmd()
         self.collectAllofConfig()
         perfOpt = self.genPerfOpt()
         self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
+
+    def delRunCmd(self):
+        self.entry_runCMD.delete(0, 'end')
+        self.entry_runCMD.configure(state='readonly')
 
     def isValidiP(self, ip):
         m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
@@ -754,9 +759,15 @@ class mainlevel:
             self.clock.stop()
 
     def clearState(self):  # stephenhsu.20191112_1749
-        global list_perfCMD
+        global list_perfCMD, bool_btnStart
         print("Test")
-        self.quit()
+        if bool_btnStart == True:
+            if self.clock.is_alive():
+                self.clock.resume()
+            else:
+                self.clock.start()
+        self.btn_Start.configure(text='''Start''')
+        bool_btnStart = False
         list_perfCMD.clear()
         # disable all of checked box
         gp3_support.che47.set(0)
@@ -852,7 +863,7 @@ class Clock(threading.Thread):
                     previous = now.second
                     for resp in p.stdout:
                         second_resp = resp
-                        if now.second % 2 == 0:
+                        if now.second % 1 == 0:
                             level = logging.ERROR
                         else:
                             level = logging.INFO
