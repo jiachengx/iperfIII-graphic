@@ -18,6 +18,8 @@ logger = logging.getLogger('')
 perfCMD = ""
 dict_config = {}
 list_perfCMD = []
+thread_num = 0
+bool_btnStart = False
 
 try:
     import Tkinter as tk
@@ -528,56 +530,68 @@ class mainlevel:
         if gp3_support.che50.get() == 1:
             self.entry_srvPort.configure(state='normal')
         elif gp3_support.che50.get() == 0:
-            self.entry_srvPort.delete(0,'end')
+            self.entry_srvPort.delete(0, 'end')
             self.entry_srvPort.configure(state='disabled')
 
         if gp3_support.che47.get() == 1:
             self.entry_cInterval.configure(state='normal')
         elif gp3_support.che47.get() == 0:
-            self.entry_cInterval.delete(0,'end')
+            self.entry_cInterval.delete(0, 'end')
             self.entry_cInterval.configure(state='disabled')
         if gp3_support.che49.get() == 1:
             self.entry_cListenedPort.configure(state='normal')
         elif gp3_support.che49.get() == 0:
-            self.entry_cListenedPort.delete(0,'end')
+            self.entry_cListenedPort.delete(0, 'end')
             self.entry_cListenedPort.configure(state='disabled')
         if gp3_support.che51.get() == 1:
             self.entry_testTime.configure(state='normal')
         elif gp3_support.che51.get() == 0:
-            self.entry_testTime.delete(0,'end')
+            self.entry_testTime.delete(0, 'end')
             self.entry_testTime.configure(state='disabled')
         if gp3_support.che53.get() == 1:
             self.entry_numOfParallelClient.configure(state='normal')
         elif gp3_support.che53.get() == 0:
-            self.entry_numOfParallelClient.delete(0,'end')
+            self.entry_numOfParallelClient.delete(0, 'end')
             self.entry_numOfParallelClient.configure(state='disabled')
         if gp3_support.che63.get() == 1:
             self.entry_bw.configure(state='normal')
             self.cmb_BWrate.configure(state='normal')
         elif gp3_support.che63.get() == 0:
-            self.entry_bw.delete(0,'end')
+            self.entry_bw.delete(0, 'end')
             self.entry_bw.configure(state='disabled')
             self.cmb_BWrate.configure(state='disabled')
         if gp3_support.che68.get() == 1:
             self.entry_windowSize.configure(state='normal')
             self.cmb_WindowSize.configure(state='normal')
         elif gp3_support.che68.get() == 0:
-            self.entry_windowSize.delete(0,'end')
+            self.entry_windowSize.delete(0, 'end')
             self.entry_windowSize.configure(state='disabled')
             self.cmb_WindowSize.configure(state='disabled')
 
     def go(self):
+        global thread_num, bool_btnStart
+        thread_num += 1
         dict_config.clear()
-        self.entry_runCMD.configure(state='normal')
+        if bool_btnStart == False:
+            if self.clock.is_alive():
+                self.quit()
+            else:
+                self.clock.start()
+            self.btn_Start.configure(text='''Stop''')
+            bool_btnStart = True
+        else:
+            bool_btnStart = True
+            if self.clock.is_alive():
+                self.clock.resume()
+            else:
+                self.clock.start()
+            self.btn_Start.configure(text='''Start ...''')
+            bool_btnStart = False
         self.entry_runCMD.delete(0, 'end')
         self.entry_runCMD.configure(state='readonly')
         self.collectAllofConfig()
         perfOpt = self.genPerfOpt()
         self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
-
-        self.clock.start()
-
-
 
     def isValidiP(self, ip):
         m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
@@ -689,7 +703,7 @@ class mainlevel:
             return
 
     def genPerfOpt(self):
-        if len(list_perfCMD)>0:
+        if len(list_perfCMD) > 0:
             list_perfCMD.clear()
         if dict_config.get('mode') == "Server":
             list_perfCMD.append("-s")
@@ -755,6 +769,7 @@ class mainlevel:
         gp3_support.che63.set(0)
         gp3_support.che68.set(0)
         # Clear all of textbox
+        self.btn_Start.configure()
         self.entry_srvInterval.delete(0, 'end')
         self.entry_srvPort.delete(0, 'end')
         self.entry_ipaddr.delete(0, 'end')
@@ -800,6 +815,16 @@ class Clock(threading.Thread):
     def __init__(self):
         super().__init__()
         self._stop_event = threading.Event()
+        self._can_run = threading.Event()
+        self._stop_event.set()
+        self._can_run.set()
+
+    def pause(self):
+        self._can_run.clear()
+        self._stop_event.wait()
+
+    def resume(self):
+        self._can_run.set()
 
     def getCurrentTime(self):
         return datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S_%f')
@@ -810,44 +835,40 @@ class Clock(threading.Thread):
 
     def run(self):
         global fn
-        fn = open("iperf3_{0}.log".format(self.getCurrentTime()), "a+")
-        logger.debug('[Debug] Thread clock started.')
-        previous = -1
-        second_resp = b''
-        p = sub.Popen("dir /s", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-        # p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-        while not self._stop_event.is_set():
-            now = datetime.datetime.now()
-            if previous != now.second:
-                previous = now.second
-                for resp in p.stdout:
-                    second_resp = resp
-                    if now.second % 2 == 0:
-                        level = logging.ERROR
-                    else:
-                        level = logging.INFO
-                    logger.log(level, resp.decode('utf-8').strip('\r\n'))
-                    self.outToLog(second_resp)
+        while True:
+            self._can_run.wait()
+            try:
+                self._stop_event.clear()
+                # do the thing
+                logger.debug('[Debug] Thread clock started.')
+                previous = -1
+                second_resp = b''
+                p = sub.Popen("dir /b", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                # p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                # while not self._stop_event.is_set():
+                fn = open("iperf3_{0}.log".format(self.getCurrentTime()), "a+")
+                now = datetime.datetime.now()
+                if previous != now.second:
+                    previous = now.second
+                    for resp in p.stdout:
+                        second_resp = resp
+                        if now.second % 2 == 0:
+                            level = logging.ERROR
+                        else:
+                            level = logging.INFO
+                        logger.log(level, resp.decode('utf-8').strip('\r\n'))
+                        self.outToLog(second_resp)
+                    # mode detect
+                    self.pause()
+                    self.stop()
+                    fn.close()
+                sleep(0.2)
+            finally:
                 self._stop_event.set()
-                fn.close()
-            sleep(0.2)
-
-
-
-            #sleep(0.2)
 
     def stop(self):
         self._stop_event.set()
 
-"""            #p = sub.Popen("dir /s", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-            #p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-            #with open("iperf3_{0}.log".format(self.getCurrentTime()), "a") as fn:
-            #    for resp in p.stdout:
-            #        level = logging.INFO
-            #        logger.log(level, resp.decode('utf-8').strip('\r\n'))
-            #        # logging out to iperf_{datetime}.log file
-            #        fn.writelines(resp.decode('utf-8').strip('\r\n') + '\n')
-            #    self._stop_event.set()"""
 
 class QueueHandler(logging.Handler):
     """Class to send logging records to a queue
