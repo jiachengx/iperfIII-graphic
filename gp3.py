@@ -19,6 +19,7 @@ dict_config = {}
 list_perfCMD = []
 bool_btnStart = False
 daemon = False
+perfOpt = []
 
 try:
     import Tkinter as tk
@@ -59,7 +60,7 @@ def disable_event():
     pass
 
 def closeMain():
-    sys.exit()
+    root.destroy()
 
 def create_mainlevel(root, *args, **kwargs):
     """Starting point when module is imported by another program."""
@@ -584,22 +585,21 @@ class mainlevel:
             self.cmb_WindowSize.configure(state='disabled')
 
     def go(self):
-        global thread_num, bool_btnStart
+        global thread_num, bool_btnStart, perfOpt
         dict_config.clear()
         if bool_btnStart == False:
-            if daemon:
-                self.clock.resume()
-            else:
-                self.clock.start()
             self.btn_Start.configure(text='''Stop''')
             self.btn_Reset.configure(state="disabled")
             self.delRunCmd()
             self.collectAllofConfig()
             perfOpt = self.genPerfOpt()
+            if daemon:
+                self.clock.resume()
+            else:
+                self.clock.start()
             self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
             bool_btnStart = True
             if dict_config['mode'] == "Client":
-                self.delRunCmd()
                 self.clock.stop()
                 self.btn_Reset.configure(state="normal")
                 self.btn_Start.configure(text='''Start''')
@@ -620,6 +620,7 @@ class mainlevel:
             fn.flush()
 
     def delRunCmd(self):
+        self.entry_runCMD.configure(state='normal')
         self.entry_runCMD.delete(0, 'end')
         self.entry_runCMD.configure(state='readonly')
 
@@ -856,7 +857,7 @@ class Clock(threading.Thread):
         return datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S_%f')
 
     def run(self):
-        global daemon, fn
+        global daemon, fn, perfOpt
         daemon = True
         while True:
             self._can_run.wait()
@@ -866,8 +867,8 @@ class Clock(threading.Thread):
                 logger.debug('[Debug] Thread clock started.')
                 previous = -1
                 second_resp = b''
-                p = sub.Popen("dir /b", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-                # p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                #p = sub.Popen("dir /b", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                p = sub.Popen("iperf3 {0}".format(" ".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 # while not self._stop_event.is_set():
                 fn_file = self.getCurrentTime()
                 now = datetime.datetime.now()
