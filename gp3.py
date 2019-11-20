@@ -49,6 +49,7 @@ def vp_start_gui():
     # Add logging to scrolled text function and detect break stephenhsu.20191114_1136
     logging.basicConfig(level=logging.INFO)
     root.protocol("WM_DELETE_WINDOW", disable_event)
+    root.iconbitmap("mainIcon.ico")
     root.mainloop()
 
 
@@ -58,7 +59,6 @@ def disable_event():
     pass
 
 def closeMain():
-    root.quit()
     sys.exit()
 
 def create_mainlevel(root, *args, **kwargs):
@@ -103,7 +103,7 @@ class mainlevel:
         top.minsize(116, 1)
         top.maxsize(1028, 750)
         top.resizable(0, 0)
-        top.title("iperf3 GUI")
+        top.title("IPERF3 UI")
         top.configure(background="#d9d9d9")
         top.configure(highlightbackground="#d9d9d9")
         top.configure(highlightcolor="black")
