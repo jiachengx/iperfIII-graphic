@@ -8,7 +8,6 @@ import datetime
 import logging
 import queue
 import re
-import signal
 import subprocess as sub
 import sys
 import threading
@@ -49,11 +48,18 @@ def vp_start_gui():
     gp3_support.init(root, top)
     # Add logging to scrolled text function and detect break stephenhsu.20191114_1136
     logging.basicConfig(level=logging.INFO)
+    root.protocol("WM_DELETE_WINDOW", disable_event)
     root.mainloop()
 
 
 w = None
 
+def disable_event():
+    pass
+
+def closeMain():
+    root.quit()
+    sys.exit()
 
 def create_mainlevel(root, *args, **kwargs):
     """Starting point when module is imported by another program."""
@@ -63,6 +69,7 @@ def create_mainlevel(root, *args, **kwargs):
     gp3_support.set_Tk_var()
     top = mainlevel(w)
     gp3_support.init(w, top, *args, **kwargs)
+
     return (w, top)
 
 
@@ -91,9 +98,6 @@ class mainlevel:
         self.style.map('.', background=
         [('selected', _compcolor), ('active', _ana2color)])
 
-        self.root = root
-        self.root.bind('Control-q>', self.quit)
-        signal.signal(signal.SIGINT, self.quit)
 
         top.geometry("459x381+321+181")
         top.minsize(116, 1)
@@ -517,6 +521,17 @@ class mainlevel:
         self.label_Mode.configure(highlightcolor="black")
         self.label_Mode.configure(text='''Mode''')
 
+        self.btn_Close = tk.Button(top, command=closeMain)
+        self.btn_Close.place(relx=0.44, rely=0.879, height=36, width=78)
+        self.btn_Close.configure(activebackground="#ececec")
+        self.btn_Close.configure(activeforeground="#000000")
+        self.btn_Close.configure(background="#d9d9d9")
+        self.btn_Close.configure(disabledforeground="#a3a3a3")
+        self.btn_Close.configure(foreground="#000000")
+        self.btn_Close.configure(highlightbackground="#d9d9d9")
+        self.btn_Close.configure(highlightcolor="black")
+        self.btn_Close.configure(pady="0")
+        self.btn_Close.configure(text='''Exit''')
     # ======================================================
     # Customized function
     # ======================================================
