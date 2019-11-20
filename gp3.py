@@ -100,10 +100,10 @@ class mainlevel:
         [('selected', _compcolor), ('active', _ana2color)])
 
 
-        top.geometry("459x381+321+181")
+        top.geometry("751x381+321+181")
         top.minsize(116, 1)
         top.maxsize(1028, 750)
-        top.resizable(0, 0)
+        top.resizable(1, 1)
         top.title("IPERF3 UI")
         top.configure(background="#d9d9d9")
         top.configure(highlightbackground="#d9d9d9")
@@ -503,7 +503,7 @@ class mainlevel:
         # Start polling messages from the queue
         self.lframe_output.after(100, self.poll_log_queue)
 
-        self.combox_modeSwitch = ttk.Combobox(top)
+        self.combox_modeSwitch = ttk.Combobox(top, state='readonly')
         self.combox_modeSwitch.place(relx=0.024, rely=0.081, relheight=0.058
                                      , relwidth=0.159)
         self.value_list = ['Server', 'Client']
@@ -729,9 +729,6 @@ class mainlevel:
                     return
                 else:
                     dict_config['cWindowSize'] = self.entry_windowSize.get() + self.cmb_WindowSize.get()[0]
-        else:
-            messagebox.showerror("Mode Switch", "Please check your Mode configuration")
-            return
 
     def genPerfOpt(self):
         if len(list_perfCMD) > 0:
@@ -868,8 +865,7 @@ class Clock(threading.Thread):
                 previous = -1
                 second_resp = b''
                 #p = sub.Popen("dir /b", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-                p = sub.Popen("iperf3 {0}".format(" ".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-                # while not self._stop_event.is_set():
+                p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 fn_file = self.getCurrentTime()
                 now = datetime.datetime.now()
                 if previous != now.second:
