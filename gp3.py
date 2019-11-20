@@ -18,8 +18,8 @@ logger = logging.getLogger('')
 perfCMD = ""
 dict_config = {}
 list_perfCMD = []
-thread_num = 0
 bool_btnStart = False
+daemon = False
 
 try:
     import Tkinter as tk
@@ -463,7 +463,7 @@ class mainlevel:
         self.label_ver.configure(foreground="#000000")
         self.label_ver.configure(highlightbackground="#d9d9d9")
         self.label_ver.configure(highlightcolor="black")
-        self.label_ver.configure(text='''Ver. 1.1.1983''')
+        self.label_ver.configure(text='''Ver. 1.2.0211''')
 
         self.lframe_output = tk.LabelFrame(top)
         self.lframe_output.place(relx=0.414, rely=0.197, relheight=0.669
@@ -570,29 +570,32 @@ class mainlevel:
             self.cmb_WindowSize.configure(state='disabled')
 
     def go(self):
-        global thread_num, bool_btnStart
-        thread_num += 1
+        global thread_num, bool_btnStart,clientMode
         dict_config.clear()
         if bool_btnStart == False:
-            if self.clock.is_alive():
-                self.quit()
-            else:
-                self.clock.start()
-            self.btn_Start.configure(text='''Stop''')
-            bool_btnStart = True
-        else:
-            bool_btnStart = True
-            self.delRunCmd()
-            if self.clock.is_alive():
+            if daemon:
                 self.clock.resume()
             else:
                 self.clock.start()
+            self.btn_Start.configure(text='''Stop''')
+            self.btn_Reset.configure(state="disabled")
+            self.delRunCmd()
+            self.collectAllofConfig()
+            perfOpt = self.genPerfOpt()
+            self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
+            bool_btnStart = True
+            if dict_config['mode'] == "Client":
+                self.delRunCmd()
+                self.clock.stop()
+                self.btn_Reset.configure(state="normal")
+                self.btn_Start.configure(text='''Start''')
+                bool_btnStart = False
+        else:
+            self.delRunCmd()
+            self.clock.stop()
+            self.btn_Reset.configure(state="normal")
             self.btn_Start.configure(text='''Start''')
             bool_btnStart = False
-        self.delRunCmd()
-        self.collectAllofConfig()
-        perfOpt = self.genPerfOpt()
-        self.fillInPerfcmd("iperf3 {0}".format(perfOpt))
 
     def delRunCmd(self):
         self.entry_runCMD.delete(0, 'end')
@@ -761,13 +764,7 @@ class mainlevel:
     def clearState(self):  # stephenhsu.20191112_1749
         global list_perfCMD, bool_btnStart
         print("Test")
-        if bool_btnStart == True:
-            if self.clock.is_alive():
-                self.clock.resume()
-            else:
-                self.clock.start()
-        self.btn_Start.configure(text='''Start''')
-        bool_btnStart = False
+        daemon = False
         list_perfCMD.clear()
         # disable all of checked box
         gp3_support.che47.set(0)
@@ -829,6 +826,7 @@ class Clock(threading.Thread):
         self._can_run = threading.Event()
         self._stop_event.set()
         self._can_run.set()
+        self.daemon = False
 
     def pause(self):
         self._can_run.clear()
@@ -845,7 +843,8 @@ class Clock(threading.Thread):
         fn.flush()
 
     def run(self):
-        global fn
+        global daemon, fn
+        daemon = True
         while True:
             self._can_run.wait()
             try:
