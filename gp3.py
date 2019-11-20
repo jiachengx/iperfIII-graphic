@@ -48,7 +48,6 @@ def vp_start_gui():
     top = mainlevel(root)
     gp3_support.init(root, top)
     # Add logging to scrolled text function and detect break stephenhsu.20191114_1136
-    #logging.basicConfig(level=logging.DEBUG)
     logging.basicConfig(level=logging.INFO)
     root.mainloop()
 
@@ -570,7 +569,7 @@ class mainlevel:
             self.cmb_WindowSize.configure(state='disabled')
 
     def go(self):
-        global thread_num, bool_btnStart,clientMode
+        global thread_num, bool_btnStart
         dict_config.clear()
         if bool_btnStart == False:
             if daemon:
@@ -590,12 +589,20 @@ class mainlevel:
                 self.btn_Reset.configure(state="normal")
                 self.btn_Start.configure(text='''Start''')
                 bool_btnStart = False
+                self.outToLog()
         else:
             self.delRunCmd()
             self.clock.stop()
+            self.outToLog()
             self.btn_Reset.configure(state="normal")
             self.btn_Start.configure(text='''Start''')
             bool_btnStart = False
+
+    def outToLog(self):
+        content = self.scrolledtxt_output.get('1.0','end')
+        with open("iperf3_{0}.log".format(self.clock.getCurrentTime()), "a") as fn:
+            fn.writelines(content.strip('\r\n') + '\n')
+            fn.flush()
 
     def delRunCmd(self):
         self.entry_runCMD.delete(0, 'end')
@@ -761,10 +768,8 @@ class mainlevel:
         except:
             self.clock.stop()
 
-    def clearState(self):  # stephenhsu.20191112_1749
+    def clearState(self):
         global list_perfCMD, bool_btnStart
-        print("Test")
-        daemon = False
         list_perfCMD.clear()
         # disable all of checked box
         gp3_support.che47.set(0)
@@ -792,10 +797,7 @@ class mainlevel:
         self.entry_runCMD.configure(state='readonly')
         self.combox_modeSwitch.set('Server')
         self.scrolledtxt_output.delete('1.0', 'end')
-        # window rate
         self.cmb_WindowSize.set('KB')
-
-        # Bandwidth
         self.cmb_BWrate.set('KB')
         # disable all of entry textbox
         self.entry_bw.configure(state='disabled')
@@ -838,10 +840,6 @@ class Clock(threading.Thread):
     def getCurrentTime(self):
         return datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S_%f')
 
-    def outToLog(self, content):
-        fn.writelines(content.decode('utf-8').strip('\r\n') + '\n')
-        fn.flush()
-
     def run(self):
         global daemon, fn
         daemon = True
@@ -856,7 +854,7 @@ class Clock(threading.Thread):
                 p = sub.Popen("dir /b", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 # p = sub.Popen("iperf3 {0}".format(" ".join(list_perfCMD)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 # while not self._stop_event.is_set():
-                fn = open("iperf3_{0}.log".format(self.getCurrentTime()), "a+")
+                fn_file = self.getCurrentTime()
                 now = datetime.datetime.now()
                 if previous != now.second:
                     previous = now.second
@@ -882,13 +880,13 @@ class Clock(threading.Thread):
                             else:
                                 level = logging.INFO
                             logger.log(level, resp.decode('utf-8').strip('\r\n'))
-                            self.outToLog(second_resp)
+                            #self.outToLog(second_resp, fn_file, True)
                     logger.log(level, "=========================")
                     # mode detect
                     # if mode = server, keep monitor the port
                     self.pause()
                     self.stop()
-                    fn.close()
+                    #self.outToLog(second_resp, fn_file, False)
                 sleep(0.2)
             finally:
                 self._stop_event.set()
@@ -1045,8 +1043,6 @@ class AutoScroll(object):
             pass
         hsb = ttk.Scrollbar(master, orient='horizontal', command=self.xview)
 
-        # self.configure(yscrollcommand=_autoscroll(vsb),
-        #    xscrollcommand=_autoscroll(hsb))
         try:
             self.configure(yscrollcommand=self._autoscroll(vsb))
         except:
