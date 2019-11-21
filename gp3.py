@@ -12,7 +12,7 @@ import subprocess as sub
 import sys
 import threading
 from time import sleep
-import os
+import os, signal
 
 logger = logging.getLogger('')
 perfCMD = ""
@@ -53,7 +53,6 @@ def vp_start_gui():
     logging.basicConfig(level=logging.INFO)
     root.protocol("WM_DELETE_WINDOW", disable_event)
     root.mainloop()
-
 
 w = None
 
@@ -545,7 +544,7 @@ class mainlevel:
     # ======================================================
     # Customized function
     # ======================================================
-    def closeMain(self):
+    def closeMain(self, *args):
         self.clock.stop()
         root.destroy()
 
@@ -601,6 +600,7 @@ class mainlevel:
         dict_config.clear()
         if bool_btnStart == False:
             self.btn_Start.configure(text='''Stop''')
+            self.btn_Close.configure(state="disabled")
             self.btn_Reset.configure(state="disabled")
             self.delRunCmd()
             self.collectAllofConfig()
@@ -613,6 +613,7 @@ class mainlevel:
             bool_btnStart = True
             if dict_config['mode'] == "Client":
                 self.clock.stop()
+                self.btn_Close.configure(state="normal")
                 self.btn_Reset.configure(state="normal")
                 self.btn_Start.configure(text='''Start''')
                 bool_btnStart = False
@@ -622,6 +623,7 @@ class mainlevel:
             self.clock.stop()
             self.outToLog()
             killIperfCmd()
+            self.btn_Close.configure(state="normal")
             self.btn_Reset.configure(state="normal")
             self.btn_Start.configure(text='''Start''')
             bool_btnStart = False
@@ -1190,8 +1192,14 @@ def _on_shiftmouse(event, widget):
 
 if __name__ == '__main__':
     print("Command checker:")
-    if sub.call(["iperf3"], shell=True) != 0:
-        input("\nPlease install the iperf3 app first [Press Enter to exit] ...")
+    try:
+        #resp = sub.check_output(["iperf3","-V"], shell=False)
+        resp = sub.check_output(["git","--version"], shell=False)
+    except:
+        input("[Info] No iperf3 command is found.\n\n  \tPlease install the iperf3 app first [Press Enter to exit] ...")
         sys.exit(0)
+
+   #if b"features" in resp:
+   #        print("[Status] iperf3 command is found.\n[Info] Launch the iperf3 UI application.")
     vp_start_gui()
-    sys.exit(0)
+    os.kill(os.getpid(), signal.SIGINT)
