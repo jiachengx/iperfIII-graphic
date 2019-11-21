@@ -1197,7 +1197,7 @@ def _on_shiftmouse(event, widget):
 if __name__ == '__main__':
     print("Command checker:")
     try:
-        resp = sub.check_output(["iperf3","-V"], shell=False)
+        resp = sub.check_output(["iperf3","--version"], shell=False)
     except:
         input("[Info] No iperf3 command is found.\n\n  \tPlease install the iperf3 app first [Press Enter to exit] ...")
         sys.exit(0)
