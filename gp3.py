@@ -20,6 +20,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
+ver = "1.2.811112"
 
 try:
     import Tkinter as tk
@@ -55,11 +56,20 @@ def vp_start_gui():
 
 w = None
 
+
+def killIperfCmd():
+        if platform.system() == 'Windows':
+                out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"], shell=False)
+        else:
+            out_bytes = sub.check_output(['pkill', 'iperf3'], shell=False)
+
 def disable_event():
     pass
 
+
 def closeMain():
     root.destroy()
+
 
 def create_mainlevel(root, *args, **kwargs):
     """Starting point when module is imported by another program."""
@@ -69,7 +79,6 @@ def create_mainlevel(root, *args, **kwargs):
     gp3_support.set_Tk_var()
     top = mainlevel(w)
     gp3_support.init(w, top, *args, **kwargs)
-
     return (w, top)
 
 
@@ -97,7 +106,6 @@ class mainlevel:
         self.style.configure('.', font="TkDefaultFont")
         self.style.map('.', background=
         [('selected', _compcolor), ('active', _ana2color)])
-
 
         top.geometry("751x381+321+181")
         top.minsize(116, 1)
@@ -237,8 +245,6 @@ class mainlevel:
         self.entry_cInterval.configure(selectforeground="black")
 
         self.chk_cListenedPort = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
-        #self.chk_cListenedPort.place(relx=0.028, rely=0.235, relheight=0.102
-        #                             , relwidth=0.283, bordermode='ignore')
         self.chk_cListenedPort.place(relx=0.070, rely=0.235, relheight=0.102
                                      , relwidth=0.283, bordermode='ignore')
         self.chk_cListenedPort.configure(activebackground="#ececec")
@@ -468,7 +474,7 @@ class mainlevel:
         self.label_ver.configure(foreground="#000000")
         self.label_ver.configure(highlightbackground="#d9d9d9")
         self.label_ver.configure(highlightcolor="black")
-        self.label_ver.configure(text='''Ver. 1.2.0211''')
+        self.label_ver.configure(text='''Ver. {0}'''.format(ver))
 
         self.lframe_output = tk.LabelFrame(top)
         self.lframe_output.place(relx=0.414, rely=0.197, relheight=0.669
@@ -534,6 +540,7 @@ class mainlevel:
         self.btn_Close.configure(highlightcolor="black")
         self.btn_Close.configure(pady="0")
         self.btn_Close.configure(text='''Exit''')
+
     # ======================================================
     # Customized function
     # ======================================================
@@ -610,13 +617,18 @@ class mainlevel:
             self.delRunCmd()
             self.clock.stop()
             self.outToLog()
+            killIperfCmd()
             self.btn_Reset.configure(state="normal")
             self.btn_Start.configure(text='''Start''')
             bool_btnStart = False
 
     def outToLog(self):
-        content = self.scrolledtxt_output.get('1.0','end')
-        with open("iperf3_{0}.log".format(self.clock.getCurrentTime()), "a") as fn:
+        import os
+        if not os.path.exists("logs"):
+            os.mkdir("logs")
+        content = self.scrolledtxt_output.get('1.0', 'end')
+        with open("{0}//logs//iperf3_{1}.log".format(os.getcwd(),self.clock.getCurrentTime()), "a") as fn:
+            fn.writelines("iperf command: iperf3 {0}\n".format(perfOpt))
             fn.writelines(content.strip('\r\n') + '\n')
             fn.flush()
 
@@ -763,6 +775,7 @@ class mainlevel:
         print(record)
         msg = self.queue_handler.format(record)
         self.scrolledtxt_output.insert("end", msg + "\n")
+        self.scrolledtxt_output.yview('end')
 
     def poll_log_queue(self):
         # Check every 100ms if there is a new message in the queue to display
@@ -865,8 +878,10 @@ class Clock(threading.Thread):
                 logger.debug('[Debug] Thread clock started.')
                 previous = -1
                 second_resp = b''
-                #p = sub.Popen("dir /b", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
-                p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                # for test
+                p = sub.Popen("dir /p", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                fn_file = self.getCurrentTime()
+                #p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 fn_file = self.getCurrentTime()
                 now = datetime.datetime.now()
                 if previous != now.second:
@@ -893,13 +908,11 @@ class Clock(threading.Thread):
                             else:
                                 level = logging.INFO
                             logger.log(level, resp.decode('utf-8').strip('\r\n'))
-                            #self.outToLog(second_resp, fn_file, True)
                     logger.log(level, "=========================")
                     # mode detect
                     # if mode = server, keep monitor the port
                     self.pause()
                     self.stop()
-                    #self.outToLog(second_resp, fn_file, False)
                 sleep(0.2)
             finally:
                 self._stop_event.set()
