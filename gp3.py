@@ -20,7 +20,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.811112"
+ver = "1.2.1211911513"
 
 try:
     import Tkinter as tk
@@ -59,7 +59,7 @@ w = None
 
 def killIperfCmd():
         if platform.system() == 'Windows':
-                out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"], shell=False)
+            out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"])
         else:
             out_bytes = sub.check_output(['pkill', 'iperf3'], shell=False)
 
@@ -465,7 +465,7 @@ class mainlevel:
         ToolTip(self.entry_runCMD, tooltip_font, '''"Generate the iperf3 command automatically"''', delay=0.5)
 
         self.label_ver = tk.Label(top)
-        self.label_ver.place(relx=0.808, rely=0.924, height=22, width=79)
+        self.label_ver.place(relx=0.808, rely=0.924, height=22, width=100)
         self.label_ver.configure(activebackground="#f9f9f9")
         self.label_ver.configure(activeforeground="black")
         self.label_ver.configure(background="#d9d9d9")
