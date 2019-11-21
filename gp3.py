@@ -50,7 +50,6 @@ def vp_start_gui():
     # Add logging to scrolled text function and detect break stephenhsu.20191114_1136
     logging.basicConfig(level=logging.INFO)
     root.protocol("WM_DELETE_WINDOW", disable_event)
-    root.iconbitmap("mainIcon.ico")
     root.mainloop()
 
 
@@ -103,7 +102,7 @@ class mainlevel:
         top.geometry("751x381+321+181")
         top.minsize(116, 1)
         top.maxsize(1028, 750)
-        top.resizable(1, 1)
+        top.resizable(0, 0)
         top.title("IPERF3 UI")
         top.configure(background="#d9d9d9")
         top.configure(highlightbackground="#d9d9d9")
@@ -162,7 +161,7 @@ class mainlevel:
         self.chk_srvinterval.configure(variable=gp3_support.che59)
 
         self.chk_srvPort = tk.Checkbutton(self.lframe_Server, command=self.function_UISwitch)
-        self.chk_srvPort.place(relx=0.04, rely=0.573, relheight=0.347
+        self.chk_srvPort.place(relx=0.075, rely=0.573, relheight=0.347
                                , relwidth=0.413, bordermode='ignore')
         self.chk_srvPort.configure(activebackground="#ececec")
         self.chk_srvPort.configure(activeforeground="#000000")
@@ -238,7 +237,9 @@ class mainlevel:
         self.entry_cInterval.configure(selectforeground="black")
 
         self.chk_cListenedPort = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
-        self.chk_cListenedPort.place(relx=0.028, rely=0.235, relheight=0.102
+        #self.chk_cListenedPort.place(relx=0.028, rely=0.235, relheight=0.102
+        #                             , relwidth=0.283, bordermode='ignore')
+        self.chk_cListenedPort.place(relx=0.070, rely=0.235, relheight=0.102
                                      , relwidth=0.283, bordermode='ignore')
         self.chk_cListenedPort.configure(activebackground="#ececec")
         self.chk_cListenedPort.configure(activeforeground="#000000")
@@ -295,7 +296,7 @@ class mainlevel:
         self.entry_testTime.configure(selectforeground="black")
 
         self.chk_numOfParallelClient = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
-        self.chk_numOfParallelClient.place(relx=0.044, rely=0.416
+        self.chk_numOfParallelClient.place(relx=0.005, rely=0.416
                                            , relheight=0.102, relwidth=0.9, bordermode='ignore')
         self.chk_numOfParallelClient.configure(activebackground="#ececec")
         self.chk_numOfParallelClient.configure(activeforeground="#000000")
@@ -309,7 +310,7 @@ class mainlevel:
         self.chk_numOfParallelClient.configure(variable=gp3_support.che53)
 
         self.entry_numOfParallelClient = tk.Entry(self.lframe_ClientMode, state='disabled')
-        self.entry_numOfParallelClient.place(relx=0.15, rely=0.502, height=17
+        self.entry_numOfParallelClient.place(relx=0.23, rely=0.502, height=17
                                              , relwidth=0.467, bordermode='ignore')
         self.entry_numOfParallelClient.configure(background="white")
         self.entry_numOfParallelClient.configure(disabledforeground="#a3a3a3")
@@ -322,7 +323,7 @@ class mainlevel:
         self.entry_numOfParallelClient.configure(selectforeground="black")
 
         self.chk_enableUDP = tk.Checkbutton(self.lframe_ClientMode)
-        self.chk_enableUDP.place(relx=0.028, rely=0.569, relheight=0.102
+        self.chk_enableUDP.place(relx=0.040, rely=0.569, relheight=0.102
                                  , relwidth=0.511, bordermode='ignore')
         self.chk_enableUDP.configure(activebackground="#ececec")
         self.chk_enableUDP.configure(activeforeground="#000000")
@@ -336,7 +337,7 @@ class mainlevel:
         self.chk_enableUDP.configure(variable=gp3_support.che56)
 
         self.chk_bandwidth = tk.Checkbutton(self.lframe_ClientMode, command=self.function_UISwitch)
-        self.chk_bandwidth.place(relx=0.028, rely=0.651, relheight=0.102
+        self.chk_bandwidth.place(relx=0.035, rely=0.651, relheight=0.102
                                  , relwidth=0.511, bordermode='ignore')
         self.chk_bandwidth.configure(activebackground="#ececec")
         self.chk_bandwidth.configure(activeforeground="#000000")
@@ -443,7 +444,7 @@ class mainlevel:
 
         self.entry_runCMD = tk.Entry(top)
         self.entry_runCMD.place(relx=0.015, rely=0.919, height=17
-                                , relwidth=0.379)
+                                , relwidth=0.450)
         self.entry_runCMD.configure(background="white")
         self.entry_runCMD.configure(disabledforeground="#a3a3a3")
         self.entry_runCMD.configure(font="TkFixedFont")
@@ -523,7 +524,7 @@ class mainlevel:
         self.label_Mode.configure(text='''Mode''')
 
         self.btn_Close = tk.Button(top, command=closeMain)
-        self.btn_Close.place(relx=0.44, rely=0.879, height=36, width=78)
+        self.btn_Close.place(relx=0.48, rely=0.879, height=36, width=78)
         self.btn_Close.configure(activebackground="#ececec")
         self.btn_Close.configure(activeforeground="#000000")
         self.btn_Close.configure(background="#d9d9d9")
@@ -1176,3 +1177,4 @@ def _on_shiftmouse(event, widget):
 
 if __name__ == '__main__':
     vp_start_gui()
+    sys.exit(0)
