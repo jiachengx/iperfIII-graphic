@@ -21,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.21201911513"
+ver = "1.2.1211195916"
 
 try:
     import Tkinter as tk
@@ -60,12 +60,15 @@ w = None
 def killIperfCmd():
     try:
         if platform.system() == 'Windows':
-            out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"])
+            resp = sub.check_output(["tasklist", "/fi", "Imagename eq iperf3.exe"], shell=True)
+            if b"iperf3.exe" in resp:
+                out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"], shell=False)
         else:
-            out_bytes = sub.check_output(['pkill', 'iperf3'], shell=False)
+            resp = sub.check_output(["pidof","gp3"])
+            if b"iperf3" in resp:
+                out_bytes = sub.check_output(["pkill", "iperf3"], shell=False)
     except:
         pass
-
 
 def disable_event():
     pass
@@ -596,9 +599,10 @@ class mainlevel:
             self.cmb_WindowSize.configure(state='disabled')
 
     def go(self):
-        global thread_num, bool_btnStart, perfOpt
+        global bool_btnStart, perfOpt
         dict_config.clear()
-        if bool_btnStart == False:
+        if not bool_btnStart:
+            killIperfCmd()
             self.btn_Start.configure(text='''Stop''')
             self.btn_Close.configure(state="disabled")
             self.btn_Reset.configure(state="disabled")
