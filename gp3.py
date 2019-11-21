@@ -21,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.20201911513"
+ver = "1.2.21201911513"
 
 try:
     import Tkinter as tk
@@ -877,14 +877,11 @@ class Clock(threading.Thread):
             self._can_run.wait()
             try:
                 self._stop_event.clear()
-                # do the thing
                 logger.debug('[Debug] Thread clock started.')
                 previous = -1
                 second_resp = b''
-                # for test
-                p = sub.Popen("dir /p", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 fn_file = self.getCurrentTime()
-                # p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 fn_file = self.getCurrentTime()
                 now = datetime.datetime.now()
                 if previous != now.second:
@@ -1192,13 +1189,9 @@ def _on_shiftmouse(event, widget):
 
 
 if __name__ == '__main__':
-    if platform.system() == 'Windows':
-        print("Command checker:")
-        resp = sub.call(["iperf3"], shell=True)
-        if resp != 0:
-            input("Please install the iperf3 app first [Press Enter to exit] ...")
-            sys.exit(0)
-        else:
-            vp_start_gui()
-
+    print("Command checker:")
+    if sub.call(["iperf3"], shell=True) != 0:
+        input("\nPlease install the iperf3 app first [Press Enter to exit] ...")
+        sys.exit(0)
+    vp_start_gui()
     sys.exit(0)
