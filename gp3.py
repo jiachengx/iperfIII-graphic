@@ -12,6 +12,7 @@ import subprocess as sub
 import sys
 import threading
 from time import sleep
+import os
 
 logger = logging.getLogger('')
 perfCMD = ""
@@ -20,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.1211911513"
+ver = "1.2.20201911513"
 
 try:
     import Tkinter as tk
@@ -58,17 +59,17 @@ w = None
 
 
 def killIperfCmd():
+    try:
         if platform.system() == 'Windows':
             out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"])
         else:
             out_bytes = sub.check_output(['pkill', 'iperf3'], shell=False)
+    except:
+        pass
+
 
 def disable_event():
     pass
-
-
-def closeMain():
-    root.destroy()
 
 
 def create_mainlevel(root, *args, **kwargs):
@@ -529,7 +530,7 @@ class mainlevel:
         self.label_Mode.configure(highlightcolor="black")
         self.label_Mode.configure(text='''Mode''')
 
-        self.btn_Close = tk.Button(top, command=closeMain)
+        self.btn_Close = tk.Button(top, command=self.closeMain)
         self.btn_Close.place(relx=0.48, rely=0.879, height=36, width=78)
         self.btn_Close.configure(activebackground="#ececec")
         self.btn_Close.configure(activeforeground="#000000")
@@ -544,6 +545,9 @@ class mainlevel:
     # ======================================================
     # Customized function
     # ======================================================
+    def closeMain(self):
+        self.clock.stop()
+        root.destroy()
 
     def function_UISwitch(self):
         if gp3_support.che59.get() == 1:
@@ -623,11 +627,10 @@ class mainlevel:
             bool_btnStart = False
 
     def outToLog(self):
-        import os
         if not os.path.exists("logs"):
             os.mkdir("logs")
         content = self.scrolledtxt_output.get('1.0', 'end')
-        with open("{0}//logs//iperf3_{1}.log".format(os.getcwd(),self.clock.getCurrentTime()), "a") as fn:
+        with open("{0}//logs//iperf3_{1}.log".format(os.getcwd(), self.clock.getCurrentTime()), "a") as fn:
             fn.writelines("iperf command: iperf3 {0}\n".format(perfOpt))
             fn.writelines(content.strip('\r\n') + '\n')
             fn.flush()
@@ -881,7 +884,7 @@ class Clock(threading.Thread):
                 # for test
                 p = sub.Popen("dir /p", stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 fn_file = self.getCurrentTime()
-                #p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+                # p = sub.Popen("iperf3 {0}".format("".join(perfOpt)), stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
                 fn_file = self.getCurrentTime()
                 now = datetime.datetime.now()
                 if previous != now.second:
@@ -1189,5 +1192,13 @@ def _on_shiftmouse(event, widget):
 
 
 if __name__ == '__main__':
-    vp_start_gui()
+    if platform.system() == 'Windows':
+        print("Command checker:")
+        resp = sub.call(["iperf3"], shell=True)
+        if resp != 0:
+            input("Please install the iperf3 app first [Press Enter to exit] ...")
+            sys.exit(0)
+        else:
+            vp_start_gui()
+
     sys.exit(0)
