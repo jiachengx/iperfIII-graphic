@@ -21,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.1211195916"
+ver = "1.2.1211192917"
 
 try:
     import Tkinter as tk
@@ -901,7 +901,7 @@ class Clock(threading.Thread):
                                 else:
                                     level = logging.INFO
                                 if outResp == b"":
-                                    sleep(0.5)
+                                    sleep(0.2)
                                 else:
                                     logger.log(level, outResp.decode('utf-8').strip('\r\n'))
                             else:
@@ -1197,13 +1197,13 @@ def _on_shiftmouse(event, widget):
 if __name__ == '__main__':
     print("Command checker:")
     try:
-        #resp = sub.check_output(["iperf3","-V"], shell=False)
-        resp = sub.check_output(["git","--version"], shell=False)
+        resp = sub.check_output(["iperf3","-V"], shell=False)
     except:
         input("[Info] No iperf3 command is found.\n\n  \tPlease install the iperf3 app first [Press Enter to exit] ...")
         sys.exit(0)
 
-   #if b"features" in resp:
-   #        print("[Status] iperf3 command is found.\n[Info] Launch the iperf3 UI application.")
+    if b"features" in resp:
+        print("[Status] iperf3 command is found.\n[Info] Launch the iperf3 UI application.")
+
     vp_start_gui()
     os.kill(os.getpid(), signal.SIGINT)
