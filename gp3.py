@@ -21,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.1211192917"
+ver = "1.2.2211194510"
 
 try:
     import Tkinter as tk
@@ -54,23 +54,27 @@ def vp_start_gui():
     root.protocol("WM_DELETE_WINDOW", disable_event)
     root.mainloop()
 
+
 w = None
 
 
 def killIperfCmd():
+    """Killing the iperf app when iperf3 process is running."""
     try:
         if platform.system() == 'Windows':
             resp = sub.check_output(["tasklist", "/fi", "Imagename eq iperf3.exe"], shell=True)
             if b"iperf3.exe" in resp:
                 out_bytes = sub.check_output(["taskkill", "/F", "/IM", "iperf3.exe"], shell=False)
         else:
-            resp = sub.check_output(["pidof","gp3"])
+            resp = sub.check_output(["pidof", "gp3"])
             if b"iperf3" in resp:
                 out_bytes = sub.check_output(["pkill", "iperf3"], shell=False)
     except:
         pass
 
+
 def disable_event():
+    """disable the exit window event"""
     pass
 
 
@@ -548,10 +552,15 @@ class mainlevel:
     # Customized function
     # ======================================================
     def closeMain(self, *args):
+        """Destroy the main level and stop the clock thread"""
         self.clock.stop()
         root.destroy()
 
     def function_UISwitch(self):
+        """UI switch selector. when Ui item is actived, entry box will change the status from disable to normal. for
+        otherwise, when the checkbox is inactive, the text string in entry box will be clear and then change the
+        statement to disable.
+        """
         if gp3_support.che59.get() == 1:
             self.entry_srvInterval.configure(state='normal')
         elif gp3_support.che59.get() == 0:
@@ -599,6 +608,7 @@ class mainlevel:
             self.cmb_WindowSize.configure(state='disabled')
 
     def go(self):
+        """Starting the main workflow"""
         global bool_btnStart, perfOpt
         dict_config.clear()
         if not bool_btnStart:
@@ -633,6 +643,8 @@ class mainlevel:
             bool_btnStart = False
 
     def outToLog(self):
+        """Check if the logs sub-folder exists or not. if not, create the new logs folder at current dir.
+        Exporting all of scrolled text box content to log file. """
         if not os.path.exists("logs"):
             os.mkdir("logs")
         content = self.scrolledtxt_output.get('1.0', 'end')
@@ -642,18 +654,22 @@ class mainlevel:
             fn.flush()
 
     def delRunCmd(self):
+        """Delete all of content in runCMD entry text box"""
         self.entry_runCMD.configure(state='normal')
         self.entry_runCMD.delete(0, 'end')
         self.entry_runCMD.configure(state='readonly')
 
     def isValidiP(self, ip):
+        """Check if the ip structure is valid or not"""
         m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
         return bool(m) and all(map(lambda n: 0 <= int(n) <= 255, m.groups()))
 
     def isNum(self, content):
+        """Check if the content is number or not"""
         return str(content).isdigit()
 
     def collectAllofConfig(self):
+        """Collecting all of UI content into dict_config list."""
         mode = self.combox_modeSwitch.get()  # mode
 
         if mode == 'Server':
@@ -753,6 +769,7 @@ class mainlevel:
                     dict_config['cWindowSize'] = self.entry_windowSize.get() + self.cmb_WindowSize.get()[0]
 
     def genPerfOpt(self):
+        """Translate the UI configuration to iperf3 actual option and then return them"""
         if len(list_perfCMD) > 0:
             list_perfCMD.clear()
         if dict_config.get('mode') == "Server":
@@ -781,7 +798,7 @@ class mainlevel:
         return " ".join(list_perfCMD)
 
     def display(self, record):
-        print(record)
+        # Display the message on scroll text window and then autoscroll to the bottom.
         msg = self.queue_handler.format(record)
         self.scrolledtxt_output.insert("end", msg + "\n")
         self.scrolledtxt_output.yview('end')
@@ -805,6 +822,7 @@ class mainlevel:
             self.clock.stop()
 
     def clearState(self):
+        """Rrset button event, when reset button is pressed it will be launched"""
         global list_perfCMD, bool_btnStart
         list_perfCMD.clear()
         # disable all of checked box
@@ -846,6 +864,7 @@ class mainlevel:
         self.entry_windowSize.configure(state='disabled')
 
     def fillInPerfcmd(self, cmd):
+        # Fill in the iperf3 command to entry text box automatically.
         self.entry_runCMD.configure(state='normal')
         self.entry_runCMD.insert(0, cmd)
         self.entry_runCMD.configure(state='readonly')
@@ -1197,7 +1216,7 @@ def _on_shiftmouse(event, widget):
 if __name__ == '__main__':
     print("Command checker:")
     try:
-        resp = sub.check_output(["iperf3","--version"], shell=False)
+        resp = sub.check_output(["iperf3", "--version"], shell=False)
     except:
         input("[Info] No iperf3 command is found.\n\n  \tPlease install the iperf3 app first [Press Enter to exit] ...")
         sys.exit(0)
