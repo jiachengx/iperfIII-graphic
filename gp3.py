@@ -56,10 +56,6 @@ def vp_start_gui():
     root.mainloop()
 
 
-def callback(eventObject):
-    print(eventObject)
-
-
 w = None
 
 
