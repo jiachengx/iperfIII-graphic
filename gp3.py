@@ -21,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.2211194510"
+ver = "1.2.2211194416"
 
 try:
     import Tkinter as tk
@@ -55,8 +55,10 @@ def vp_start_gui():
 
     root.mainloop()
 
+
 def callback(eventObject):
     print(eventObject)
+
 
 w = None
 
@@ -520,24 +522,35 @@ class mainlevel:
         # Start polling messages from the queue
         self.lframe_output.after(100, self.poll_log_queue)
 
-        self.combox_modeSwitch = ttk.Combobox(top, state='readonly')
-        self.combox_modeSwitch.place(relx=0.024, rely=0.081, relheight=0.058
-                                     , relwidth=0.159)
-        self.value_list = ['','Server', 'Client']
-        self.combox_modeSwitch.configure(values=self.value_list)
-        self.combox_modeSwitch.configure(takefocus="")
-        self.combox_modeSwitch.set("")
+        self.radiobtn_server = tk.Radiobutton(top, command=self.function_UISwitch)
+        self.radiobtn_server.place(relx=0.019, rely=0.026, relheight=0.068
+                                   , relwidth=0.083)
+        self.radiobtn_server.configure(activebackground="#ececec")
+        self.radiobtn_server.configure(activeforeground="#000000")
+        self.radiobtn_server.configure(background="#d9d9d9")
+        self.radiobtn_server.configure(disabledforeground="#a3a3a3")
+        self.radiobtn_server.configure(foreground="#000000")
+        self.radiobtn_server.configure(highlightbackground="#d9d9d9")
+        self.radiobtn_server.configure(highlightcolor="black")
+        self.radiobtn_server.configure(justify='left')
+        self.radiobtn_server.configure(text='''Server''')
+        self.radiobtn_server.configure(value="1")
+        self.radiobtn_server.configure(variable=gp3_support.selectedButton)
 
-        self.label_Mode = tk.Label(top)
-        self.label_Mode.place(relx=0.022, rely=0.018, height=22, width=37)
-        self.label_Mode.configure(activebackground="#f9f9f9")
-        self.label_Mode.configure(activeforeground="black")
-        self.label_Mode.configure(background="#d9d9d9")
-        self.label_Mode.configure(disabledforeground="#a3a3a3")
-        self.label_Mode.configure(foreground="#000000")
-        self.label_Mode.configure(highlightbackground="#d9d9d9")
-        self.label_Mode.configure(highlightcolor="black")
-        self.label_Mode.configure(text='''Mode''')
+        self.radiobtn_client = tk.Radiobutton(top, command=self.function_UISwitch)
+        self.radiobtn_client.place(relx=0.019, rely=0.105, relheight=0.068
+                                   , relwidth=0.083)
+        self.radiobtn_client.configure(activebackground="#ececec")
+        self.radiobtn_client.configure(activeforeground="#000000")
+        self.radiobtn_client.configure(background="#d9d9d9")
+        self.radiobtn_client.configure(disabledforeground="#a3a3a3")
+        self.radiobtn_client.configure(foreground="#000000")
+        self.radiobtn_client.configure(highlightbackground="#d9d9d9")
+        self.radiobtn_client.configure(highlightcolor="black")
+        self.radiobtn_client.configure(justify='left')
+        self.radiobtn_client.configure(text='''Client''')
+        self.radiobtn_client.configure(value="2")
+        self.radiobtn_client.configure(variable=gp3_support.selectedButton)
 
         self.btn_Close = tk.Button(top, command=self.closeMain)
         self.btn_Close.place(relx=0.48, rely=0.879, height=36, width=78)
@@ -564,6 +577,28 @@ class mainlevel:
         otherwise, when the checkbox is inactive, the text string in entry box will be clear and then change the
         statement to disable.
         """
+        if gp3_support.selectedButton.get() == 1:
+            self.chk_srvinterval.configure(state='normal')
+            self.chk_srvPort.configure(state='normal')
+            self.entry_ipaddr.configure(state='disabled')
+            self.chk_clientInterval.configure(state='disabled')
+            self.chk_cListenedPort.configure(state='disabled')
+            self.chk_numOfParallelClient.configure(state='disabled')
+            self.chk_bandwidth.configure(state='disabled')
+            self.chk_enableUDP.configure(state='disabled')
+            self.chk_testDuration.configure(state='disabled')
+            self.chk_windowSize.configure(state='disabled')
+        elif gp3_support.selectedButton.get() == 2:
+            self.chk_srvinterval.configure(state='disabled')
+            self.chk_srvPort.configure(state='disabled')
+            self.entry_ipaddr.configure(state='normal')
+            self.chk_clientInterval.configure(state='normal')
+            self.chk_cListenedPort.configure(state='normal')
+            self.chk_numOfParallelClient.configure(state='normal')
+            self.chk_bandwidth.configure(state='normal')
+            self.chk_enableUDP.configure(state='normal')
+            self.chk_testDuration.configure(state='normal')
+            self.chk_windowSize.configure(state='normal')
 
         if gp3_support.che59.get() == 1:
             self.entry_srvInterval.configure(state='normal')
@@ -683,7 +718,10 @@ class mainlevel:
 
     def collectAllofConfig(self):
         """Collecting all of UI content into dict_config list."""
-        mode = self.combox_modeSwitch.get()  # mode
+        if gp3_support.selection.get() == 1:
+            mode = "Server"
+        elif gp3_support.selection.get() == 2:
+            mode = "Client"
 
         if mode == 'Server':
             dict_config['mode'] = mode
@@ -862,7 +900,6 @@ class mainlevel:
         self.entry_runCMD.configure(state='normal')
         self.entry_runCMD.delete(0, 'end')
         self.entry_runCMD.configure(state='readonly')
-        self.combox_modeSwitch.set('Server')
         self.scrolledtxt_output.delete('1.0', 'end')
         self.cmb_WindowSize.set('KB')
         self.cmb_BWrate.set('KB')
@@ -875,6 +912,17 @@ class mainlevel:
         self.entry_srvPort.configure(state='disabled')
         self.entry_testTime.configure(state='disabled')
         self.entry_windowSize.configure(state='disabled')
+        gp3_support.selectedButton.set(0)
+        self.chk_srvinterval.configure(state='normal')
+        self.chk_srvPort.configure(state='normal')
+        self.entry_ipaddr.configure(state='normal')
+        self.chk_clientInterval.configure(state='normal')
+        self.chk_cListenedPort.configure(state='normal')
+        self.chk_numOfParallelClient.configure(state='normal')
+        self.chk_bandwidth.configure(state='normal')
+        self.chk_enableUDP.configure(state='normal')
+        self.chk_testDuration.configure(state='normal')
+        self.chk_windowSize.configure(state='normal')
 
     def fillInPerfcmd(self, cmd):
         """Fill in the iperf3 command to entry text box automatically.
