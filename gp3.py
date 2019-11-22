@@ -52,8 +52,11 @@ def vp_start_gui():
     # Add logging to scrolled text function and detect break stephenhsu.20191114_1136
     logging.basicConfig(level=logging.INFO)
     root.protocol("WM_DELETE_WINDOW", disable_event)
+
     root.mainloop()
 
+def callback(eventObject):
+    print(eventObject)
 
 w = None
 
@@ -520,10 +523,10 @@ class mainlevel:
         self.combox_modeSwitch = ttk.Combobox(top, state='readonly')
         self.combox_modeSwitch.place(relx=0.024, rely=0.081, relheight=0.058
                                      , relwidth=0.159)
-        self.value_list = ['Server', 'Client']
+        self.value_list = ['','Server', 'Client']
         self.combox_modeSwitch.configure(values=self.value_list)
         self.combox_modeSwitch.configure(takefocus="")
-        self.combox_modeSwitch.set('Server')
+        self.combox_modeSwitch.set("")
 
         self.label_Mode = tk.Label(top)
         self.label_Mode.place(relx=0.022, rely=0.018, height=22, width=37)
@@ -561,6 +564,7 @@ class mainlevel:
         otherwise, when the checkbox is inactive, the text string in entry box will be clear and then change the
         statement to disable.
         """
+
         if gp3_support.che59.get() == 1:
             self.entry_srvInterval.configure(state='normal')
         elif gp3_support.che59.get() == 0:
@@ -613,11 +617,14 @@ class mainlevel:
         dict_config.clear()
         if not bool_btnStart:
             killIperfCmd()
+            try:
+                self.collectAllofConfig()
+            except:
+                return
             self.btn_Start.configure(text='''Stop''')
             self.btn_Close.configure(state="disabled")
             self.btn_Reset.configure(state="disabled")
             self.delRunCmd()
-            self.collectAllofConfig()
             perfOpt = self.genPerfOpt()
             if daemon:
                 self.clock.resume()
