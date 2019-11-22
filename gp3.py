@@ -660,12 +660,18 @@ class mainlevel:
         self.entry_runCMD.configure(state='readonly')
 
     def isValidiP(self, ip):
-        """Check if the ip structure is valid or not"""
+        """Check if the ip structure is valid or not
+        Arguments:
+            ip: The ip that checked in this function
+        """
         m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
         return bool(m) and all(map(lambda n: 0 <= int(n) <= 255, m.groups()))
 
     def isNum(self, content):
-        """Check if the content is number or not"""
+        """Check if the content is number or not
+        Arguments:
+            content: The content that checked in this function
+        """
         return str(content).isdigit()
 
     def collectAllofConfig(self):
@@ -864,7 +870,10 @@ class mainlevel:
         self.entry_windowSize.configure(state='disabled')
 
     def fillInPerfcmd(self, cmd):
-        # Fill in the iperf3 command to entry text box automatically.
+        """Fill in the iperf3 command to entry text box automatically.
+        Arguments:
+            The cmd that fill in this function
+        """
         self.entry_runCMD.configure(state='normal')
         self.entry_runCMD.insert(0, cmd)
         self.entry_runCMD.configure(state='readonly')
