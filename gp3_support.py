@@ -39,7 +39,8 @@ def set_Tk_var():
     che63 = tk.IntVar()
     global che68
     che68 = tk.IntVar()
-
+    global selectedButton
+    selectedButton = tk.IntVar()
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
