@@ -21,7 +21,7 @@ list_perfCMD = []
 bool_btnStart = False
 daemon = False
 perfOpt = []
-ver = "1.2.2211194416"
+ver = "1.2.2511192413"
 
 try:
     import Tkinter as tk
@@ -714,9 +714,9 @@ class mainlevel:
 
     def collectAllofConfig(self):
         """Collecting all of UI content into dict_config list."""
-        if gp3_support.selection.get() == 1:
+        if gp3_support.selectedButton.get() == 1:
             mode = "Server"
-        elif gp3_support.selection.get() == 2:
+        elif gp3_support.selectedButton.get() == 2:
             mode = "Client"
 
         if mode == 'Server':
