@@ -1,2 +1,2 @@
-# gp3
-iperf3 with UI interface , cross platform version
+# iperf III with Graphic User Interface 
+iperf3 with Graphic User Interface
