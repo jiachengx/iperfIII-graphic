@@ -2,7 +2,6 @@
 #  -*- coding: utf-8 -*-
 #   Iperf3 GUI version
 #   Nov 14, 2019 11:18:09 AM
-#   Stephen Hsu
 
 import datetime
 import logging
